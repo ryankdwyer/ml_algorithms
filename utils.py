@@ -2,6 +2,7 @@ import random
 import csv
 import math
 
+
 def splitDataset(dataset, ratio):
     '''
     splitDataset takes a full set of data in
@@ -18,13 +19,14 @@ def splitDataset(dataset, ratio):
 
     return trainSet, testSet
 
+
 def loadCsv(filename, headers=0):
     '''
     Pass in a full path filename
     returns an array of rows
     assume no headers
     '''
-    
+
     rows = csv.reader(open(filename, 'rb'))
     data = list(rows)
 
@@ -35,6 +37,7 @@ def loadCsv(filename, headers=0):
         return data[1:]
 
     return data
+
 
 def splitDataByLabel(data, labels):
     '''
@@ -58,13 +61,15 @@ def splitDataByLabel(data, labels):
 
     return byClass
 
+
 def mean(numbers):
     '''
-    numbers: a vector 
+    numbers: a vector
     returns: a single mean value
     '''
 
     return sum(numbers) / float(len(numbers))
+
 
 def variance(numbers):
     '''
@@ -74,17 +79,23 @@ def variance(numbers):
 
     _mean = mean(numbers)
 
-    return sum([pow(x - _mean, 2) for x  in numbers]) / float(len(numbers) - 1)
+    return sum([pow(x - _mean, 2) for x in numbers]) / float(len(numbers) - 1)
+
 
 def stDev(numbers):
     '''
-    numbers: a vector 
+    numbers: a vector
     returns: a single standard deviation value
     '''
-    
+
     _variance = variance(numbers)
 
     return math.sqrt(_variance)
+
+
+def calculateConditionalProbability(x, mean, stDev):
+
+
 
 def summarizeByAttribute(dataset):
     '''
@@ -96,6 +107,7 @@ def summarizeByAttribute(dataset):
     summary = [(mean(attr), variance(attr), stDev(attr)) for attr in zip(*dataset)]
     return summary
 
+
 def summarizeByLabel(dataset, labels):
     '''
     dataset: array of arrays
@@ -103,7 +115,7 @@ def summarizeByLabel(dataset, labels):
     len(dataset) == len(labels)
     returns dict {label: (mean, var, stDev)}
     '''
-    
+
     groupByLabel = splitDataByLabel(dataset, labels)
 
     summaryByLabel = {}
@@ -112,4 +124,3 @@ def summarizeByLabel(dataset, labels):
         summaryByLabel[label] = summarizeByAttribute(data)
 
     return summaryByLabel
-
