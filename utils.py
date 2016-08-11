@@ -20,6 +20,14 @@ def splitDataset(dataset, ratio):
     return trainSet, testSet
 
 
+def getLabels(dataset, indexOfLabel=-1):
+    labels = []
+
+    for i in range(len(dataset)):
+        labels.append(dataset[i].pop(indexOfLabel))
+
+    return labels
+
 def loadCsv(filename, headers=0):
     '''
     Pass in a full path filename
@@ -93,8 +101,30 @@ def stDev(numbers):
     return math.sqrt(_variance)
 
 
-def calculateConditionalProbability(x, mean, stDev):
+def calcConditionalProbability(x, mean, stDev):
+    '''
+    x: the data point to test
+    mean: mean of dataset
+    stDev: standard deviation of dataset
+    '''
 
+    exponent = math.exp(-(math.pow(x-mean, 2) / (2 * math.pow(stDev, 2))))
+
+    return (1 / (math.sqrt(2 * math.pi) * stDev)) * exponent
+
+
+def calcClassProbability(summaries, vector):
+    probabilities = {}
+
+    for label, labelSummary in summaries.iteritems():
+        probabilities[label] = 1
+
+        for i in range(len(labelSummary)):
+            mean, var, stDev = labelSummary[i]
+            x = vector[i]
+            probabilities[label] *= calcConditionalProbability(x, mean, stDev)
+
+    return probabilities
 
 
 def summarizeByAttribute(dataset):
@@ -124,3 +154,23 @@ def summarizeByLabel(dataset, labels):
         summaryByLabel[label] = summarizeByAttribute(data)
 
     return summaryByLabel
+
+
+def getAccuracy(labels, predictions):
+    '''
+    labels: 1-dimensional array of length N
+    predictions: 1-dimensional array of length N
+    returns: decimal % of correct predictions
+    '''
+
+    if len(labels) != len(predictions):
+        print "Array lengths do not match"
+        return
+
+    correct = 0
+
+    for i in range(len(labels)):
+        if labels[i] == predictions[i]:
+            correct += 1
+
+    return correct / float(len(predictions))
