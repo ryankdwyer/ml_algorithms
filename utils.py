@@ -1,7 +1,11 @@
 import random
 import csv
 import math
+import os
 
+from sklearn import cross_validation
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.feature_selection import SelectPercentile, f_classif
 
 def splitDataset(dataset, ratio):
     '''
@@ -24,9 +28,31 @@ def getLabels(dataset, indexOfLabel=-1):
     labels = []
 
     for i in range(len(dataset)):
-        labels.append(dataset[i].pop(indexOfLabel))
+        if dataset[i]:
+            labels.append(dataset[i].pop(indexOfLabel))
 
     return labels
+
+def removeLabels(dataset, indexOfLabel=-1):
+    data = []
+
+    for i in range(len(dataset)):
+        if dataset[i]:
+            dataset[i].pop(indexOfLabel)
+        data.append(dataset[i])
+
+    return data
+
+
+def returnFeature(dataset, indexToReturn=0):
+    data = []
+
+    for i in range(len(dataset)):
+        if dataset[i] and dataset[i][indexToReturn]:
+            data.append(dataset[i][indexToReturn])
+
+    return data
+
 
 def loadCsv(filename, headers=0):
     '''
@@ -39,13 +65,49 @@ def loadCsv(filename, headers=0):
     data = list(rows)
 
     for i in range(len(data)):
-        data[i] = [float(x) for x in data[i]]
+        data[i] = [float(x) if isinstance(x, int) else x for x in data[i]]
 
     if headers:
         return data[1:]
 
     return data
 
+
+def concatFilesInDir(dirPath, label, outputFile):
+    '''
+    Iterate over a dir and concat all files into one csv
+    will add a label to each row
+    '''
+    with open(outputFile, 'a') as csvfile: 
+        csvwriter = csv.writer(csvfile)
+        for dataFile in os.listdir(dirPath):
+            data = open(dirPath + '/' + dataFile, 'r')
+            rows = list(data)
+            data.close()
+            for row in rows:
+                csvwriter.writerow([row, label])
+            
+
+def convertText(trainData, trainLabel, testData, testLabel):
+    '''
+    trainData: training data
+    trainLabel: training labels
+    testData: test data
+    testLabel: test labels
+    return numerical arrays of data from text vectors
+    '''
+    
+    vectorizer = TfidfVectorizer(sublinear_tf=True, max_df=0.5, stop_words='english')
+    trainDataTransformed = vectorizer.fit_transform(trainData)
+    testDataTransformed = vectorizer.transform(testData)
+    
+    selector = SelectPercentile(f_classif, percentile=0.10)
+    selector.fit(trainDataTransformed, trainLabel)
+
+    trainDataTransformed = selector.transform(trainDataTransformed).toarray()
+    testDataTransformed = selector.transform(testDataTransformed).toarray()
+
+    return trainDataTransformed, trainLabel, testDataTransformed, testLabel
 
 def splitDataByLabel(data, labels):
     '''
