@@ -88,7 +88,7 @@ def concatFilesInDir(dirPath, label, outputFile):
                 csvwriter.writerow([row, label])
             
 
-def convertText(trainData, trainLabel, testData, testLabel):
+def convertText(trainData, trainLabel, testData, testLabel, reduceDimensionality=0):
     '''
     trainData: training data
     trainLabel: training labels
@@ -98,14 +98,15 @@ def convertText(trainData, trainLabel, testData, testLabel):
     '''
     
     vectorizer = TfidfVectorizer(sublinear_tf=True, max_df=0.5, stop_words='english')
-    trainDataTransformed = vectorizer.fit_transform(trainData)
-    testDataTransformed = vectorizer.transform(testData)
+    trainDataTransformed = vectorizer.fit_transform(trainData).toarray()
+    testDataTransformed = vectorizer.transform(testData).toarray()
     
-    selector = SelectPercentile(f_classif, percentile=0.10)
-    selector.fit(trainDataTransformed, trainLabel)
+    if reduceDimensionality:
+        selector = SelectPercentile(f_classif, percentile=0.10)
+        selector.fit(trainDataTransformed, trainLabel)
 
-    trainDataTransformed = selector.transform(trainDataTransformed).toarray()
-    testDataTransformed = selector.transform(testDataTransformed).toarray()
+        trainDataTransformed = selector.transform(trainDataTransformed).toarray()
+        testDataTransformed = selector.transform(testDataTransformed).toarray()
 
     return trainDataTransformed, trainLabel, testDataTransformed, testLabel
 
@@ -169,10 +170,16 @@ def calcConditionalProbability(x, mean, stDev):
     mean: mean of dataset
     stDev: standard deviation of dataset
     '''
+    
+    try:
 
-    exponent = math.exp(-(math.pow(x-mean, 2) / (2 * math.pow(stDev, 2))))
+        exponent = math.exp(-(math.pow(x-mean, 2) / (2 * math.pow(stDev, 2))))
 
-    return (1 / (math.sqrt(2 * math.pi) * stDev)) * exponent
+        return (1 / (math.sqrt(2 * math.pi) * stDev)) * exponent
+
+    except:
+
+        return 0
 
 
 def calcClassProbability(summaries, vector):

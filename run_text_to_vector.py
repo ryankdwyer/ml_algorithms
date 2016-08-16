@@ -1,23 +1,22 @@
 import utils
 import sys
 
-if __name__ == "__main__":
 
-    filename = sys.argv[1]
-    
-    data = utils.loadCsv(filename)
-    train, test = utils.splitDataset(data, 0.1)
+def text_to_vector(trainSet, trainLabels, testSet, testLabels):
 
-    trainLabels = utils.getLabels(train)
-    testLabels = utils.getLabels(test)
+    #data = utils.loadCsv(filename)
+    #train, test = utils.splitDataset(data, 0.1)
 
-    train = utils.returnFeature(train, 0)
-    test = utils.returnFeature(test, 0)
+    #trainLabels = utils.getLabels(train)
+    #testLabels = utils.getLabels(test)
 
-    train, trainLabels, test, testLabels = utils.convertText(
-            train, 
+    trainSet = utils.returnFeature(trainSet, 0)
+    testSet = utils.returnFeature(testSet, 0)
+
+    trainSet, trainLabels, testSet, testLabels = utils.convertText(
+            trainSet, 
             trainLabels, 
-            test, 
+            testSet, 
             testLabels)
-
-
+    
+    return trainSet, trainLabels, testSet, testLabels
