@@ -27,7 +27,6 @@ if __name__ == "__main__":
                 testSet, 
                 testLabels)
 
-    print trainSet
     print "Fitting the training data..."
     t0 = time.time()
     NBg.fit(trainSet, trainLabels)
